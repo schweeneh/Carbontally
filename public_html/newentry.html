@@ -1,0 +1,236 @@
+<!DOCTYPE HTML>
+<html manifest="ct.appcache">
+    <head>
+        
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
+        <link rel="stylesheet" href="css/jquery.mobile-1.1.0.min.css" />
+        <link rel="stylesheet" href="css/carbontally.css"/>
+        <script src="js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="js/modernizr.custom.57700.js"></script>
+        <script src="js/Carbontally.js"></script>
+        <script src="js/json2.js"></script>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>New Entry</title>
+        
+    </head>
+    <body>
+        
+        <script type="text/javascript">
+            $(document).delegate("#newentry","pageinit",function(){
+               //initially hide the saved banner.
+                $("saved_banner").hide();
+ 
+                //hide or show the car park in the header.
+                if(CT.getCarParkName()){
+                    showCarPark();
+                }
+                else{
+                    hideCarPark();
+                }
+ 
+                //Register the ajax loading image.
+                $(document).ajaxStart(function(){
+                    $.mobile.showPageLoadingMsg("b","Saving...",true);
+                });
+                
+                //when a carpark is chosen, hide the carpark text box and show the selection in the header.
+                $("#btsavecarpark").on("click", function(e){
+                   //e.preventDefault();
+                   var carpark = $("#tbcarpark");
+                   //var carparkID = carpark.val();
+                   var carparkName = $.trim(carpark.val());
+                   if(!carparkName || carparkName.length === 0){
+                       alert("Please enter a car park.");
+                   }
+                   else{
+                       CT.setCarPark(carparkName);
+                       showCarPark();    
+                   }
+                });
+                
+                //Shows the carpark chosen in the header, hides the car park radio buttons
+                function showCarPark(){
+                    $("#carpark").hide();
+                    $("#carparkText").html("Carpark: " + CT.getCarParkName());
+                    $("#carparkTextSave").html("to " + CT.getCarParkName() + " carpark");
+                    $("#carparkHeader").show();
+                    $("newentry").find("div[data-role=header]").page();
+                }
+                
+                function hideCarPark(){
+                    $("#carpark").show();
+                    $("#carparkHeader").hide();
+                    $("newentry").find("div[data-role=header]").page();
+                }
+                
+                //when the user clicks the "change" link next to car park in the header.
+                $("#carparkChange").on("click", function(){
+                    $("#tbcarpark").val(CT.getCarParkName());
+                    //hide the header and show the radio buttons again.
+                    hideCarPark();
+                });
+                
+                //When the save and add another button is clicked save the car.
+                $("#saveplus").click(function(e){
+                    var fuel = $("input[name=fueltype]:checked");
+                    var size = $("input[name=cartype]:checked");
+                    var num_of_passengers = $("input[name=numpassengers]:checked");
+                    var full = $("input[name=fullyloaded]:checked");
+                    var notes = $("#notes");
+                    var saved_locally_banner = $("#saved_locally_banner");
+                    var saved_remotely_banner = $("#saved_remotely_banner");
+                    var header = $("#header");
+                    
+                    if(!fuel.val()){
+                        alert("Please enter a fuel type.")
+                    }
+                    else if(!size.val()){
+                        //size.checkboxradio({theme: "e"});
+                        alert("Please enter a car size.")
+                    }
+                    else if(!num_of_passengers.val()){
+                        //size.checkboxradio({theme: "e"});
+                        alert("Please enter number of passengers.")
+                    }
+                    else if(!full.val()){
+                        //size.checkboxradio({theme: "e"});
+                        alert("Please enter a value for full.")
+                    }
+                    else if(!CT.getCarParkName()){
+                        //a car park has not been entered.
+                        alert("Please enter a car park.")
+                    }
+                    else{
+                        var car = new CT.Car(CT.getCarParkName(), fuel.val(), size.val(), full.val(), num_of_passengers.val(), notes.val(), CT.formatDate(new Date()));
+                        
+                        try{
+                            car.save({done: function(){
+                                        //clear the controls.
+                                        fuel.removeAttr('checked').checkboxradio('refresh');
+                                        size.removeAttr('checked').checkboxradio('refresh');
+                                        num_of_passengers.removeAttr('checked').checkboxradio('refresh');
+                                        full.removeAttr('checked').checkboxradio('refresh');
+                                        notes.val("");
+                                    },
+                                    savedRemotely: function(){
+                                        //show the remote save message.
+                                        header.hide();
+                                        saved_remotely_banner.show();
+                                        saved_remotely_banner.fadeOut(1000, function(){
+                                            header.show();
+                                        });
+                                    },  
+                                    savedLocally: function(){
+                                        //show the local save message.
+                                        header.hide();
+                                        saved_locally_banner.show();
+                                        saved_locally_banner.fadeOut(1000, function(){
+                                            header.show();
+                                        });
+                                    }
+                            });
+                        }
+                        catch(err){
+                            alert(err.name + ' ' + err.message);
+                        }
+                    }
+
+                    e.preventDefault();
+                });
+            });
+        </script>
+        <form id="addentry" action="newentry.html" method="post">
+            <div id="newentry" data-role="page">
+                <div id="header" data-role="header">
+                    <h1>New Entry</h1>
+                    <div id="carparkHeader" style="display: none; text-align: center; margin-bottom: 12px">
+                        <label id="carparkText" style="margin-right: 5px; font-weight: bold" ></label>
+                        <a href="newentry.html" id="carparkChange">change</a>
+                    </div>
+                </div>
+                <div style="display: none" id="saved_remotely_banner" data-theme="e" data-role="header">
+                    <h2 id="saved">Saved Remotely</h2>
+                </div>
+                <div style="display: none" id="saved_locally_banner" data-theme="e" data-role="header">
+                    <h2 id="saved">Saved Locally</h2>
+                    <h2 id="carparkTextSave" style="text-align: center"></h2>
+                </div>
+                <div data-role="content">
+                    <div id="carpark">
+                        <div id="grid-cell-carpark">
+                            <fieldset id="fs_carpark" data-role="controlgroup" data-mini="false">
+                                <legend>Car park</legend>
+                                <input type="text" id="tbcarpark" maxlength="100">
+                                <input type="button" id="btsavecarpark" value="Save car park">
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div id="grid-a">
+                        <div id="grid-cell-a">
+                            <fieldset id="fs_fuel" data-role="controlgroup" data-mini="false" data-type="horizontal" >
+                                <legend>Fuel</legend>
+                                <input type="radio" name="fueltype" id="petrol" value="1"/>
+                                <label for="petrol">Petrol</label>
+                                <input type="radio" name="fueltype" id="diesel" value="2"/>
+                                <label for="diesel">Diesel</label>
+                                <input type="radio" name="fueltype" id="hybrid" value="3"/>
+                                <label for="hybrid">Hybrid</label>
+                            </fieldset>
+                        </div>
+                        <div id="grid-cell-b">
+                            <fieldset data-role="controlgroup" data-mini="false" data-type="horizontal">
+                                <legend>Size</legend>
+                                <input data-icon="ui-icon-small-car" type="radio" name="cartype" id="small" value="1"/>
+                                <label for="small">S<span class="car_icon_mini ui-icon-small-car-mini"></span></label>
+                                <input type="radio" name="cartype" id="medium" value="2"/>
+                                <label for="medium">M<span class="car_icon_mini ui-icon-medium-car-mini"></span></label>
+                                <input type="radio" name="cartype" id="large" value="3"/>
+                                <label for="large">L<span class="car_icon_mini ui-icon-large-car-mini"></span></label>
+                                <input type="radio" name="cartype" id="van" value="4"/>
+                                <label for="van">Van<span class="car_icon_mini ui-icon-van-mini"></span></label>
+                            </fieldset>
+                        </div>
+                        <div id="grid-cell-c">
+                            <fieldset data-role="controlgroup" data-mini="false" data-type="horizontal">
+                                <legend>Number in Vehicle</legend>
+                                <input type="radio" name="numpassengers" id="1" value="1"/>
+                                <label for="1">1</label>
+                                <input type="radio" name="numpassengers" id="2" value="2"/>
+                                <label for="2">2</label>
+                                <input type="radio" name="numpassengers" id="3" value="3"/>
+                                <label for="3">3</label>
+                                <input type="radio" name="numpassengers" id="4" value="4"/>
+                                <label for="4">4</label>
+                                <input type="radio" name="numpassengers" id="5" value="5"/>
+                                <label for="5">5</label>
+                                <input type="radio" name="numpassengers" id="m" value="99"/>
+                                <label for="m">+</label>
+                        </fieldset>
+                        </div>
+                        <div id="grid-cell-d">
+                            <fieldset data-role="controlgroup" data-mini="false" data-type="horizontal">
+                                <legend>Full?</legend>
+                                <input type="radio" name="fullyloaded" id="fl-y" value="TRUE"/>
+                                <label for="fl-y">Yes</label>
+                                <input type="radio" name="fullyloaded" id="fl-n" value="FALSE"/>
+                                <label for="fl-n">No</label>
+                            </fieldset>
+                        </div>
+                        </div>
+                        <fieldset>
+                            <label for="notes">Notes</label>
+                            <textarea data-mini="false" name="notes" id="notes" maxlength="200"></textarea>
+                        </fieldset>
+                        <button id="saveplus" name="saveplus" data-theme="b" data-icon="plus" >Save and Add Another</button>
+                    </div>
+                    <div data-role="footer">
+                        <div data-role="controlgroup">
+                            <a href="index.html" data-role="button" data-icon="home" data-type="horizontal" data-ajax="false" rel="external">Home</a>
+                        </div>
+                    </div>
+                </div>
+        </form>
+    </body>
+</html>

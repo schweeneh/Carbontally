@@ -1,0 +1,134 @@
+<!DOCTYPE HTML>
+<html manifest="ct.appcache">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
+        <link rel="stylesheet" href="css/jquery.mobile-1.1.0.min.css" />
+        <script src="js/jquery.mobile-1.1.0.min.js"></script>
+        <script src="js/Carbontally.js"></script>
+        <link rel="stylesheet" href="css/carbontally.css"/>
+        <script src="js/json2.js"></script>
+        <script src="js/jqm.page.params.js"></script>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>CarbonTally</title>
+    </head>
+    <body>
+           <script type="text/javascript">
+            var displayCars = function(cars, data){
+                var localCars = 0;
+                if(cars){
+                    var carList = $("#carlist");
+
+                    cars.sort(CT.sortCarsByDateDesc);
+
+                    //initialize the car list.
+                    carList.empty();
+                    carList.append('<li data-role="list-divider">Cars</li>');
+
+                    //only display the first 50 cars for performance reasons.
+                    var numCars = 0;
+                    
+                    if(cars.length >= 50){
+                        numCars = 50;
+                    }
+                    else{
+                        numCars = cars.length;
+                    }
+                    
+                    for(var i=0;i<numCars;i++){
+                        //display each car.
+                        carList.append('<li data-icon="delete"><a class="car_link" id="' + cars[i].id + '">' + cars[i].entry_date + ' ' + CT.fuelType(cars[i].fuel) + ' ' + CT.carSize(cars[i].size) + ' with ' + CT.numberOfPassengers(cars[i].num_of_passengers) + ' passenger(s)</a></li>');
+                    }
+                    localCars = cars.length;
+                }
+                //this refreshes the JQuery mobile listview so that it renders properly.
+                $("#carlist").listview('refresh');
+
+                $("#localCars").text(localCars + " cars saved locally.");
+
+                if(data){
+                    $("#remoteCars").text(data + " cars saved on the server.");    
+                }
+                else{
+                    $("#remoteCars").text("Connect to a network to show number of cars saved on the server.");
+                }
+
+                $("car_page").find("div[data-role=header]").page();
+            }
+            
+            $(document).delegate("#upload_security","pageinit",function(){
+                //set the password from local storage if available.
+                var pwd = $("#password");
+                
+                var savedPassword = CT.getPassword(pwd.val());
+                
+                if(savedPassword){
+                    pwd.val(savedPassword);
+                }
+                
+                $("#submit_upload").on("click", function(e){
+                    var password = $("#password");
+                    if(!password.val()){
+                        alert("Please enter a password.")
+                    }
+                    else{   
+                        //save the password to local storage
+                        CT.setPassword(password.val());
+                        
+                        CT.uploadCars(
+                            function(){
+                                $.mobile.changePage("#car_page");
+                                CT.getCars(displayCars);
+                            },
+                            password.val()
+                        );
+                    }
+                    e.preventDefault();
+                });
+            });
+           
+           $(document).delegate("#car_page","pageinit",function(){
+               //load all the cars from the database. 
+               //If the database is not reachable then load all cars from the local storage.
+               CT.getCars(displayCars);
+               
+               //When a car is clicked on open a confirm box for deletion.
+               $("#carlist").delegate(".car_link","click", function(){
+                   var car = CT.getCarByID(this.id);
+                   var confirmDelete = confirm("Really delete " + car.entry_date + ' ' + CT.fuelType(car.fuel) + ' ' + CT.carSize(car.size) + ' with ' + CT.numberOfPassengers(car.num_of_passengers) + ' passenger(s)?');
+                   if(confirmDelete){
+                       CT.deleteCarByID(car.id);
+                       CT.getCars(displayCars);
+                   }
+               });
+            });
+        </script>
+        <div id="car_page" data-role="page">
+            <div data-role="header">
+                <h1>Carbon Tally</h1>
+                <a id="upload" href ="#upload_security" data-rel="dialog" data-icon="arrow-u" class="ui-btn-left" data-ajax="false">Upload</a>
+                <a href="newentry.html" data-icon="plus" class="ui-btn-right" data-ajax="false" rel="external">Add Data</a>
+            </div>
+            <div data-role="header">
+                <div id="localCars"></div>
+                <div id="remoteCars"></div>
+            </div>
+            <div data-role="content">
+                <ol id="carlist" data-role="listview" data-inset="true" data-split-icon="delete">
+                </ol>  
+            </div>
+        </div> 
+        <div id="upload_security" data-role="page">
+            <div data-role="header">
+                <h1>Upload</h1>
+            </div>
+            <div data-role="content">
+                Enter Password:
+                <input type="password" id="password">
+                <input type="button" id="submit_upload" value="Submit">
+                <a href="#car_page" data-role="button" rel="back" id="cancel_upload">Cancel</a>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,85 @@
+/* 
+    Document   : carbontally css
+    Created on : Jun 17, 2012, 12:09:00 PM
+    Author     : schweeneh
+    Description: carbontally image css.
+        
+*/
+
+root { 
+    display: block;
+}
+
+/*The image container for the car icons.*/
+.car_icon
+{
+    display: block;
+    width: 95px;
+    height: 39px;
+    background-image: url('../images/vector-cars.png');
+    background-repeat: no-repeat;
+    /*border-color: black;
+    border-width: 1px;
+    border-style: solid;*/
+}
+
+.ct-icon
+{
+    width: 16;
+    height: 16;
+}
+
+/*the small car icon position*/
+.ui-icon-small-car
+{
+    background-position: -180px 7px;
+}
+/*the medium car icon position*/
+.ui-icon-medium-car
+{
+    background-position: -183px -164px;
+}
+/*the large car icon position*/
+.ui-icon-large-car
+{
+    background-position: -91px -122px;
+}
+/*the van icon position*/
+.ui-icon-van
+{
+    background-position: 7px -78px;
+}
+
+/*The image container for the mini car icons.*/
+.car_icon_mini
+{
+    display: block;
+    width: 25px;
+    height: 10px;
+    background-image: url('../images/small-cars.png');
+    background-repeat: no-repeat;
+    /*border-color: black;
+    border-width: 1px;
+    border-style: solid;*/
+}
+/*the small car icon position*/
+.ui-icon-small-car-mini
+{
+    background-position: -45px 1px;
+}
+/*the medium car icon position*/
+.ui-icon-medium-car-mini
+{
+    width: 23px;
+    background-position: -46px -42px;
+}
+/*the large car icon position*/
+.ui-icon-large-car-mini
+{
+    background-position: -22px -31px;
+}
+/*the van icon position*/
+.ui-icon-van-mini
+{
+    background-position: 2px -20px;
+}
