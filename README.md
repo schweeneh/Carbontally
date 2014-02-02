@@ -14,9 +14,18 @@ $password = '';
 $database = '';
 ```
 ## Uploading Data
-The security requirements for Carbontally weren't very strict it uses a simple array of strings for passwords to allow users to upload data. If you want to offer carbontally as a self service application then you will have to create a user security layer.
+The security requirements for Carbontally weren't very strict so it uses a simple array of strings for passwords to allow users to upload data. If you want to offer Carbontally as a self service application then you will have to create a user security layer.
 
 To add passwords for carbontally just add them to the `$userpwd` array in utility.php.
 ```php
 $userpwd = array('your','passwords','here');
 ```
+## ToDo
+Carbontally would benefit from having the following features:
+* A robust user security layer.
+* Data export capabilities.
+* Reporting.
+
+There is the beginnings of reporting funtionality here in the code but the functionality is unfinished.
+
+*Thanks for your interest, I hope this code is beneficial to someone. If not, I'm glad it was able to be used for the greater good once or twice.*
