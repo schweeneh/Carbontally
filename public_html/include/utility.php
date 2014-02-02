@@ -1,5 +1,5 @@
 <?php
-$userpwd = array('1304','2181','7753','8079','8520','3318','7648','7203','8478','6878');
+$userpwd = array('your','passwords','here');
 /*
  * JStoPHPBool
  * Converts a string 'true' or 'false' with any case into a php boolean TRUE or FALSE.
